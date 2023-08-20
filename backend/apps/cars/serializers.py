@@ -37,13 +37,15 @@ class CarPhotoSerializer(serializers.ModelSerializer):
         }
 
 
-class BrandCarSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = BrandCarModel
-        fields = ('id', 'brand')
-
-
 class ModelCarSerializer(serializers.ModelSerializer):
     class Meta:
         model = ModelCarModel
-        fields = ('id', 'brand_name', 'brand_id')
+        fields = ('id', 'brand_name')
+
+
+class BrandCarSerializer(serializers.ModelSerializer):
+    model = ModelCarSerializer(many=True)
+
+    class Meta:
+        model = BrandCarModel
+        fields = ('id', 'brand', 'model')

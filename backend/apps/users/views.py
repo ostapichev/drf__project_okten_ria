@@ -139,7 +139,13 @@ class UserCarUpdateDestroyView(GenericAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class CityAddDeleteListView(GenericAPIView):
+class CityListAddView(GenericAPIView):
+    """
+        get:
+            Get all Cities in db
+        post:
+            Add new city in db
+    """
     queryset = CityModel.objects.all()
     permission_classes = (IsAdminUser,)
     serializer_class = CitySerializer
@@ -160,12 +166,31 @@ class CityAddDeleteListView(GenericAPIView):
         serializer.save()
         return Response(serializer.data, status.HTTP_201_CREATED)
 
+
+class CityUpdateDestroyView(GenericAPIView):
+    """
+        patch:
+            Get all Cities in db
+        delete:
+            Add new city in db
+    """
+    queryset = CityModel.objects.all()
+    permission_classes = (IsAdminUser,)
+    serializer_class = CitySerializer
+
+    def patch(self, *args, **kwargs):
+        pk = kwargs['id']
+        data = self.request.data
+        cities_data = CityModel.objects.filter(pk=pk)
+        city = cities_data.get(id=pk)
+        serializer = CitySerializer(city, data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status.HTTP_200_OK)
+
     def delete(self, *args, **kwargs):
         pk = kwargs['id']
         cities_data = CityModel.objects.filter(pk=pk)
         city = cities_data.get(id=pk)
         city.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-

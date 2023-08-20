@@ -43,8 +43,13 @@ class CarAddPhotoView(UpdateAPIView):
         super().perform_update(serializer)
 
 
-class BrandAddDestroyListView(GenericAPIView):
-    queryset = BrandCarModel.objects.all()
+class BrandListAddView(GenericAPIView):
+    """
+        get:
+            Get all brands of cars
+        post:
+            Add brand of car
+    """
     permission_classes = (IsAdminUser,)
     serializer_class = BrandCarSerializer
 
@@ -64,24 +69,54 @@ class BrandAddDestroyListView(GenericAPIView):
         serializer.save()
         return Response(serializer.data, status.HTTP_201_CREATED)
 
+
+class BrandUpdateDestroyView(GenericAPIView):
+    """
+        patch:
+            Update the brand
+        delete:
+            Delete the brand
+    """
+    permission_classes = (IsAdminUser,)
+    serializer_class = BrandCarSerializer
+
+    def patch(self, *args, **kwargs):
+        brand_id = kwargs['id']
+        data = self.request.data
+        brand_data = BrandCarModel.objects.filter(id=brand_id)
+        if not brand_data.exists():
+            raise Http404()
+        brand = brand_data.get(id=brand_id)
+        serializer = BrandCarSerializer(brand, data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status.HTTP_200_OK)
+
     def delete(self, *args, **kwargs):
-        pk = kwargs['id']
-        brands_data = BrandCarModel.objects.filter(pk=pk)
-        brand = brands_data.get(id=pk)
+        brand_id = kwargs['id']
+        brand_data = BrandCarModel.objects.filter(pk=brand_id)
+        if not brand_data.exists():
+            raise Http404()
+        brand = brand_data.get(id=brand_id)
         brand.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class ModelAddDestroyListView(GenericAPIView):
-    queryset = BrandCarModel.objects.all()
+class ModelListAddView(GenericAPIView):
+    """
+        get:
+            Get all model by brand of cars
+        post:
+            Add model by brand of car
+    """
     permission_classes = (IsAdminUser,)
     serializer_class = ModelCarSerializer
 
     def get(self, *args, **kwargs):
-        id = kwargs['id']
-        if not BrandCarModel.objects.filter(id=id).exists():
+        model_id = kwargs['id']
+        if not BrandCarModel.objects.filter(id=model_id).exists():
             raise Http404()
-        name_model = BrandCarModel.objects.filter(id=id)
+        name_model = ModelCarModel.objects.filter(brand_id=model_id)
         serializer = ModelCarSerializer(name_model, many=True)
         return Response(serializer.data, status.HTTP_200_OK)
 
@@ -100,9 +135,34 @@ class ModelAddDestroyListView(GenericAPIView):
         serializer.save(brand_id=brand_id)
         return Response(serializer.data, status.HTTP_201_CREATED)
 
+
+class ModelUpdateDestroyView(GenericAPIView):
+    """
+        patch:
+            Update model by brand of car
+        delete:
+            Delete model by brand of car
+    """
+    permission_classes = (IsAdminUser,)
+    serializer_class = ModelCarSerializer
+
+    def patch(self, *args, **kwargs):
+        model_id = kwargs['model_id']
+        data = self.request.data
+        model_data = ModelCarModel.objects.filter(id=model_id)
+        if not model_data.exists():
+            raise Http404()
+        model = model_data.get(id=model_id)
+        serializer = ModelCarSerializer(model, data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status.HTTP_200_OK)
+
     def delete(self, *args, **kwargs):
-        pk = kwargs['model_id']
-        model_data = ModelCarModel.objects.filter(pk=pk)
-        model = model_data.get(id=pk)
+        model_id = kwargs['model_id']
+        model_data = ModelCarModel.objects.filter(pk=model_id)
+        if not model_data.exists():
+            raise Http404()
+        model = model_data.get(id=model_id)
         model.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
