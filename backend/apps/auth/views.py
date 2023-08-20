@@ -76,6 +76,9 @@ class RecoveryPasswordView(GenericAPIView):
 
 
 class AuthTokenView(GenericAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = PasswordSerializer
+
     def get(self, *args, **kwargs):
         token = JWTService.create_token(self.request.user, SocketToken)
         return Response({'token': str(token)}, status.HTTP_200_OK)

@@ -4,17 +4,18 @@ from django.utils.decorators import method_decorator
 
 from rest_framework import status
 from rest_framework.generics import GenericAPIView, ListCreateAPIView, UpdateAPIView
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.views import Response
 
 from drf_yasg.utils import swagger_auto_schema
 
+from apps.users.models import CityModel
 from apps.users.models import UserModel as User
 
 from ..cars.models import CarModel
 from ..cars.serializers import CarSerializer
 from .filters import UserFilter
-from .serializers import AvatarSerializer, UserSerializer
+from .serializers import AvatarSerializer, CitySerializer, UserSerializer
 
 UserModel: User = get_user_model()
 
@@ -135,6 +136,35 @@ class UserCarUpdateDestroyView(GenericAPIView):
         if current_user_id != pk:
             raise Http404()
         car.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class CityAddDeleteListView(GenericAPIView):
+    queryset = CityModel.objects.all()
+    permission_classes = (IsAdminUser,)
+    serializer_class = CitySerializer
+
+    def get(self, *args, **kwargs):
+        cities = CityModel.objects.all()
+        serializer = CitySerializer(cities, many=True)
+        return Response(serializer.data, status.HTTP_200_OK)
+
+    def post(self, *args, **kwargs):
+        data = self.request.data
+        city_name = data.get('name')
+        existing_city = CityModel.objects.filter(name=city_name).first()
+        if existing_city:
+            return Response("City with this name already exists.", status.HTTP_400_BAD_REQUEST)
+        serializer = CitySerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status.HTTP_201_CREATED)
+
+    def delete(self, *args, **kwargs):
+        pk = kwargs['id']
+        cities_data = CityModel.objects.filter(pk=pk)
+        city = cities_data.get(id=pk)
+        city.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 

@@ -35,3 +35,15 @@ class CarPhotoSerializer(serializers.ModelSerializer):
                 'required': True
             }
         }
+
+
+class BrandCarSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BrandCarModel
+        fields = ('id', 'brand')
+
+
+class ModelCarSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ModelCarModel
+        fields = ('id', 'brand_name', 'brand_id')

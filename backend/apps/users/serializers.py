@@ -5,11 +5,9 @@ from rest_framework import serializers
 
 from core.services.email_service import EmailService
 
-from apps.users.models import CityModel
-from apps.users.models import UserModel as User
-
 from ..cars.serializers import CarSerializer
-from .models import ProfileModel
+from .models import CityModel, ProfileModel
+from .models import UserModel as User
 
 UserModel: User = get_user_model()
 
@@ -82,3 +80,9 @@ class AvatarSerializer(serializers.ModelSerializer):
                 'required': True
             }
         }
+
+
+class CitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CityModel
+        fields = ('id', 'name')
