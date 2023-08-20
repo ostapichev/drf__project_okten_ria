@@ -60,8 +60,8 @@ class BrandListAddView(GenericAPIView):
 
     def post(self, *args, **kwargs):
         data = self.request.data
-        brand = data.get('brand')
-        existing_brand = BrandCarModel.objects.filter(brand=brand).first()
+        brand = data.get('brand_name')
+        existing_brand = BrandCarModel.objects.filter(brand_name=brand).first()
         if existing_brand:
             return Response("Brand with this name already exists.", status.HTTP_400_BAD_REQUEST)
         serializer = BrandCarSerializer(data=data)
@@ -123,9 +123,9 @@ class ModelListAddView(GenericAPIView):
     def post(self, *args, **kwargs):
         brand_id = kwargs['id']
         data = self.request.data
-        brand_name = data.get('brand_name')
-        existing_brand_name = ModelCarModel.objects.filter(brand_name=brand_name).first()
-        if existing_brand_name:
+        model_name = data.get('model_name')
+        existing_model_name = ModelCarModel.objects.filter(model_name=model_name).first()
+        if existing_model_name:
             return Response("This model with this name already exists.", status.HTTP_400_BAD_REQUEST)
         serializer = ModelCarSerializer(data=data)
         serializer.is_valid(raise_exception=True)

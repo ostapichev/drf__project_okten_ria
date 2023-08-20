@@ -8,10 +8,10 @@ class CarSerializer(serializers.ModelSerializer):
     def validate_brand(self, data):
         try:
             car_name = self._kwargs['data']['model']
-            car_brand = BrandCarModel.objects.get(brand=data)
-            car_name = ModelCarModel.objects.get(brand_name=car_name)
+            car_brand = BrandCarModel.objects.get(brand_name=data)
+            car_name = ModelCarModel.objects.get(model_name=car_name)
             if car_name.brand_id == car_brand.id:
-                return car_brand.brand
+                return car_brand.brand_name
         except BrandCarModel.DoesNotExist:
             raise serializers.ValidationError(
                 "This brand of the car does not exist in the database. "
@@ -23,7 +23,7 @@ class CarSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CarModel
-        fields = ('id', 'photo_car', 'brand', 'model', 'price', 'year', 'created_at', 'updated_at', 'user')
+        fields = ('id', 'photo_car', 'brand', 'model', 'price', 'year', 'content', 'created_at', 'updated_at', 'user')
 
 
 class CarPhotoSerializer(serializers.ModelSerializer):
@@ -40,12 +40,12 @@ class CarPhotoSerializer(serializers.ModelSerializer):
 class ModelCarSerializer(serializers.ModelSerializer):
     class Meta:
         model = ModelCarModel
-        fields = ('id', 'brand_name')
+        fields = ('id', 'model_name')
 
 
 class BrandCarSerializer(serializers.ModelSerializer):
-    model = ModelCarSerializer(many=True)
+    model = ModelCarSerializer(many=True, read_only=True)
 
     class Meta:
         model = BrandCarModel
-        fields = ('id', 'brand', 'model')
+        fields = ('id', 'brand_name', 'model')

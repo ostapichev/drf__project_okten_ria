@@ -16,5 +16,5 @@ RUN pip install --upgrade pip && pip install pipenv
 COPY Pipfile* /tmp
 
 RUN cd /tmp && pipenv lock 
-RUN cd /tmp  && pipenv requirements > requirements.txt
-RUN cd /tmp  && pip install -r requirements.txt
+RUN cd /tmp && pipenv requirements > requirements.txt
+RUN cd /tmp && pip install -r requirements.txt
