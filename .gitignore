@@ -1,6 +1,5 @@
 .idea
 /.venv/
 .env
-
 /client/static/
-/backend/static/drf-yasg/
+
