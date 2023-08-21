@@ -6,7 +6,7 @@ from rest_framework import serializers
 from core.services.email_service import EmailService
 
 from ..cars.serializers import CarSerializer
-from .models import CityModel, ProfileModel
+from .models import CityModel, CountModel, ProfileModel
 from .models import UserModel as User
 
 UserModel: User = get_user_model()
@@ -86,3 +86,9 @@ class CitySerializer(serializers.ModelSerializer):
     class Meta:
         model = CityModel
         fields = ('id', 'name')
+
+
+class CountValidateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CountModel
+        fields = ('id', 'count', 'user_id')

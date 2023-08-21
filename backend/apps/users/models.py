@@ -58,3 +58,11 @@ class CityModel(models.Model):
         db_table = 'cities'
         ordering = ('id', 'name')
 
+
+class CountModel(models.Model):
+    count = models.IntegerField()
+    user = models.ForeignKey(UserModel, on_delete=models.CASCADE, related_name='count', null=True)
+
+    class Meta:
+        db_table = 'count_validate'
+        ordering = ('id', 'count')

@@ -2,12 +2,14 @@ from django.contrib.auth import get_user_model
 from django.http import Http404
 from django.utils.decorators import method_decorator
 
-from rest_framework import status
+from rest_framework import serializers, status
 from rest_framework.generics import GenericAPIView, ListCreateAPIView, UpdateAPIView
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.views import Response
 
 from drf_yasg.utils import swagger_auto_schema
+
+from core.enums.regex_enum import RegExEnum
 
 from apps.users.models import CityModel
 from apps.users.models import UserModel as User
@@ -61,6 +63,7 @@ class UserCarCreateView(GenericAPIView):
     serializer_class = UserSerializer
     queryset = UserModel.objects.all()
 
+
     def get_permissions(self):
         if self.request.method == 'GET':
             return (AllowAny(),)
@@ -79,7 +82,13 @@ class UserCarCreateView(GenericAPIView):
         pk = kwargs['pk']
         data = self.request.data
         serializer = CarSerializer(data=data)
-        serializer.is_valid(raise_exception=True)
+        try:
+            serializer.is_valid(raise_exception=True)
+        except serializers.ValidationError as e:
+            errors = e.detail
+            if errors['content'][0] == RegExEnum.CONTENT.msg:
+                print(errors['content'][0])
+            return Response(errors, status.HTTP_400_BAD_REQUEST)
         if not UserModel.objects.filter(pk=pk).exists() or current_user_id != pk:
             raise Http404()
         cars = CarModel.objects.filter(user_id=pk)
