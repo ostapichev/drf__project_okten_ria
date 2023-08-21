@@ -36,6 +36,11 @@ class RegExEnum(Enum):
           'at least one special character and at least one number min 8 max 30 characters.')
     )
 
+    CONTENT = (
+        r'\b(?:fuck|dick|shit|bitch)\bgm',
+        _('This content has some bad words!!!')
+    )
+
     def __init__(self, pattern: str, msg: str | list[str]):
         self.pattern = pattern
         self.msg = msg
