@@ -182,6 +182,8 @@ class CityUpdateDestroyView(GenericAPIView):
         pk = kwargs['id']
         data = self.request.data
         cities_data = CityModel.objects.filter(pk=pk)
+        if not cities_data.exists():
+            raise Http404()
         city = cities_data.get(id=pk)
         serializer = CitySerializer(city, data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -191,6 +193,8 @@ class CityUpdateDestroyView(GenericAPIView):
     def delete(self, *args, **kwargs):
         pk = kwargs['id']
         cities_data = CityModel.objects.filter(pk=pk)
+        if not cities_data.exists():
+            raise Http404()
         city = cities_data.get(id=pk)
         city.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

@@ -56,4 +56,3 @@ services:
     ports:
       - "5555:5555"
     command: [ "flower", "--broker=redis://redis:6379", "--port=5555" ]
-
