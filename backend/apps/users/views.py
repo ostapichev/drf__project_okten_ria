@@ -18,6 +18,7 @@ from ..cars.models import CarModel
 from ..cars.serializers import CarSerializer
 from .filters import UserFilter
 from .serializers import AvatarSerializer, CitySerializer, UserSerializer
+from .validators import validate_name_car
 
 UserModel: User = get_user_model()
 
@@ -63,7 +64,6 @@ class UserCarCreateView(GenericAPIView):
     serializer_class = UserSerializer
     queryset = UserModel.objects.all()
 
-
     def get_permissions(self):
         if self.request.method == 'GET':
             return (AllowAny(),)
@@ -81,6 +81,7 @@ class UserCarCreateView(GenericAPIView):
         current_user_id = self.request.user.pk
         pk = kwargs['pk']
         data = self.request.data
+        validate_name_car(self.request.data['brand'], self.request.data['model'])
         serializer = CarSerializer(data=data)
         try:
             serializer.is_valid(raise_exception=True)
@@ -113,37 +114,39 @@ class UserCarUpdateDestroyView(GenericAPIView):
 
     def put(self, *args, **kwargs):
         current_user_id = self.request.user.pk
-        pk = kwargs['user_id']
         data = self.request.data
-        cars_data = CarModel.objects.filter(user_id=pk)
-        car = cars_data.get(id=kwargs['car_id'])
+        validate_name_car(self.request.data['brand'], self.request.data['model'])
+        cars_data = CarModel.objects.filter(user_id=current_user_id)
+        car = cars_data.get(id=kwargs['id'])
         serializer = CarSerializer(car, data)
         serializer.is_valid(raise_exception=True)
-        if not UserModel.objects.filter(pk=pk).exists() or current_user_id != pk:
-            raise Http404()
-        serializer.save(user_id=pk)
+        serializer.save(user_id=current_user_id)
         return Response(serializer.data, status.HTTP_200_OK)
 
     def patch(self, *args, **kwargs):
         current_user_id = self.request.user.pk
-        pk = kwargs['user_id']
         data = self.request.data
-        cars_data = CarModel.objects.filter(user_id=pk)
-        car = cars_data.get(id=kwargs['car_id'])
+        cars_data = CarModel.objects.filter(user_id=current_user_id)
+        car = cars_data.get(id=kwargs['id'])
+        if 'brand' in self.request.data:
+            try:
+                validate_name_car(self.request.data['brand'], self.request.data['model'])
+            except KeyError:
+                validate_name_car(self.request.data['brand'], car.model)
+        else:
+            try:
+                validate_name_car(car.brand, self.request.data['model'])
+            except KeyError:
+                pass
         serializer = CarSerializer(car, data, partial=True)
         serializer.is_valid(raise_exception=True)
-        if not UserModel.objects.filter(pk=pk).exists() or current_user_id != pk:
-            raise Http404()
-        serializer.save(user_id=pk)
+        serializer.save(user_id=current_user_id)
         return Response(serializer.data, status.HTTP_200_OK)
 
     def delete(self, *args, **kwargs):
         current_user_id = self.request.user.pk
-        pk = kwargs['user_id']
-        cars_data = CarModel.objects.filter(user_id=pk)
-        car = cars_data.get(id=kwargs['car_id'])
-        if current_user_id != pk:
-            raise Http404()
+        cars_data = CarModel.objects.filter(user_id=current_user_id)
+        car = cars_data.get(id=kwargs['id'])
         car.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
