@@ -7,3 +7,4 @@ class CarManager(models.Manager):
 
     def all_with_cars(self):
         return self.select_related('user')
+    

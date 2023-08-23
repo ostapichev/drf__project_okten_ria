@@ -37,7 +37,7 @@ class RegExEnum(Enum):
     )
 
     CONTENT = (
-        r'\b(?!fuck|dick|shit|bitch)\b\w+',
+        r'^\b(?!fuck you|fuck|dick|shit|bitch)\b\w+',
         _('This content has some bad words!!!')
     )
 

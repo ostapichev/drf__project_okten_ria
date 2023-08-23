@@ -30,7 +30,7 @@ class CarModel(BaseModel):
         validators.MinValueValidator(1990),
         validators.MaxValueValidator(datetime.now().year)
     ))
-    content = models.TextField(blank=True, validators=(
+    content = models.TextField(validators=(
         validators.RegexValidator(RegExEnum.CONTENT.pattern, RegExEnum.CONTENT.msg),
     ))
     user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='cars', null=True)
