@@ -137,15 +137,14 @@ class BrandListAddView(GenericAPIView):
         return Response(serializer.data, status.HTTP_200_OK)
 
     def post(self, *args, **kwargs):
-        data = self.request.data
-        brand = data.get('brand_name')
-        existing_brand = BrandCarModel.objects.filter(brand_name=brand).first()
+        brand_name = self.request.data.get('brand_name')
+        existing_brand = BrandCarModel.objects.filter(brand_name=brand_name).exists()
         if existing_brand:
-            return Response("Brand with this name already exists.", status.HTTP_400_BAD_REQUEST)
-        serializer = BrandCarSerializer(data=data)
+            return Response("Brand with this name already exists.", status=status.HTTP_400_BAD_REQUEST)
+        serializer = BrandCarSerializer(data=self.request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data, status.HTTP_201_CREATED)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class BrandUpdateDestroyView(GenericAPIView):
@@ -158,24 +157,22 @@ class BrandUpdateDestroyView(GenericAPIView):
     permission_classes = (IsAdminUser,)
     serializer_class = BrandCarSerializer
 
-    def patch(self, *args, **kwargs):
-        brand_id = kwargs['id']
-        data = self.request.data
-        brand_data = BrandCarModel.objects.filter(id=brand_id)
-        if not brand_data.exists():
-            raise Http404()
-        brand = brand_data.get(id=brand_id)
-        serializer = BrandCarSerializer(brand, data, partial=True)
+    @staticmethod
+    def __get_object(pk):
+        try:
+            return BrandCarModel.objects.get(pk=pk)
+        except BrandCarModel.DoesNotExist:
+            raise Http404
+
+    def patch(self, request, id, *args, **kwargs):
+        brand = self.__get_object(id)
+        serializer = BrandCarSerializer(brand, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data, status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def delete(self, *args, **kwargs):
-        brand_id = kwargs['id']
-        brand_data = BrandCarModel.objects.filter(pk=brand_id)
-        if not brand_data.exists():
-            raise Http404()
-        brand = brand_data.get(id=brand_id)
+    def delete(self, request, id, *args, **kwargs):
+        brand = self.__get_object(id)
         brand.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -190,28 +187,29 @@ class ModelListAddView(GenericAPIView):
     permission_classes = (IsAdminUser,)
     serializer_class = ModelCarSerializer
 
-    def get(self, *args, **kwargs):
-        model_id = kwargs['id']
-        if not BrandCarModel.objects.filter(id=model_id).exists():
-            raise Http404()
-        name_model = ModelCarModel.objects.filter(brand_id=model_id)
-        serializer = ModelCarSerializer(name_model, many=True)
-        return Response(serializer.data, status.HTTP_200_OK)
+    @staticmethod
+    def __get_brand_or_404(brand_id):
+        try:
+            return BrandCarModel.objects.get(id=brand_id)
+        except BrandCarModel.DoesNotExist:
+            raise Http404
 
-    def post(self, *args, **kwargs):
-        brand_id = kwargs['id']
-        data = self.request.data
+    def get(self, request, id, *args, **kwargs):
+        brand = self.__get_brand_or_404(id)
+        models = ModelCarModel.objects.filter(brand=brand)
+        serializer = ModelCarSerializer(models, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request, id, *args, **kwargs):
+        brand = self.__get_brand_or_404(id)
+        data = request.data
         model_name = data.get('model_name')
-        existing_model_name = ModelCarModel.objects.filter(model_name=model_name).first()
-        if existing_model_name:
-            return Response("This model with this name already exists.", status.HTTP_400_BAD_REQUEST)
+        if ModelCarModel.objects.filter(brand=brand, model_name=model_name).exists():
+            return Response("This model with this name already exists.", status=status.HTTP_400_BAD_REQUEST)
         serializer = ModelCarSerializer(data=data)
         serializer.is_valid(raise_exception=True)
-        exists = BrandCarModel.objects.filter(id=brand_id).exists()
-        if not exists:
-            raise Http404
-        serializer.save(brand_id=brand_id)
-        return Response(serializer.data, status.HTTP_201_CREATED)
+        serializer.save(brand=brand)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class ModelUpdateDestroyView(GenericAPIView):
@@ -224,23 +222,21 @@ class ModelUpdateDestroyView(GenericAPIView):
     permission_classes = (IsAdminUser,)
     serializer_class = ModelCarSerializer
 
-    def patch(self, *args, **kwargs):
-        model_id = kwargs['model_id']
-        data = self.request.data
-        model_data = ModelCarModel.objects.filter(id=model_id)
-        if not model_data.exists():
-            raise Http404()
-        model = model_data.get(id=model_id)
-        serializer = ModelCarSerializer(model, data, partial=True)
+    @staticmethod
+    def __get_object_or_404(model_id):
+        try:
+            return ModelCarModel.objects.get(id=model_id)
+        except ModelCarModel.DoesNotExist:
+            raise Http404
+
+    def patch(self, request, id, *args, **kwargs):
+        model = self.__get_object_or_404(id)
+        serializer = ModelCarSerializer(model, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data, status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def delete(self, *args, **kwargs):
-        model_id = kwargs['model_id']
-        model_data = ModelCarModel.objects.filter(pk=model_id)
-        if not model_data.exists():
-            raise Http404()
-        model = model_data.get(id=model_id)
+    def delete(self, request, id, *args, **kwargs):
+        model = self.__get_object_or_404(id)
         model.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

@@ -1,7 +1,6 @@
 from django.contrib.auth import get_user_model
-from django.http import Http404
 
-from rest_framework import serializers, status
+from rest_framework import serializers
 from rest_framework.response import Response
 
 from core.enums.regex_enum import RegExEnum
@@ -15,9 +14,26 @@ UserModel: User = get_user_model()
 
 class CarSerializer(serializers.ModelSerializer):
     @staticmethod
+    def __validate_name_car(brand, model):
+        msg = "Please contact the site manager."
+        try:
+            car_brand = BrandCarModel.objects.get(brand_name=brand)
+            car_model = ModelCarModel.objects.get(model_name=model)
+            if car_model.brand_id == car_brand.id:
+                return car_brand.brand_name
+            raise serializers.ValidationError(
+                f'This model of the car does not exist in the brand. {msg}')
+        except BrandCarModel.DoesNotExist:
+            raise serializers.ValidationError(
+                f'This brand of the car does not exist in the database. {msg}')
+        except ModelCarModel.DoesNotExist:
+            raise serializers.ValidationError(
+                f'This model of the brand on the car does not exist in the database. {msg}')
+
+    @staticmethod
     def validate_name_create_car(data):
         try:
-            CarSerializer.validate_name_car(data['brand'], data['model'])
+            CarSerializer.__validate_name_car(data['brand'], data['model'])
         except KeyError:
             return Response('You must specify the brand and model')
         return CarSerializer(data=data)
@@ -34,37 +50,17 @@ class CarSerializer(serializers.ModelSerializer):
         return serializer
 
     @staticmethod
-    def validate_name_car(brand, model):
-        try:
-            car_brand = BrandCarModel.objects.get(brand_name=brand)
-            car_model = ModelCarModel.objects.get(model_name=model)
-            if car_model.brand_id == car_brand.id:
-                return car_brand.brand_name
-            raise serializers.ValidationError(
-                "This model of the car does not exist in the brand. "
-                "Please contact the site administrator.")
-        except BrandCarModel.DoesNotExist:
-            raise serializers.ValidationError(
-                "This brand of the car does not exist in the database. "
-                "Please contact the site administrator.")
-        except ModelCarModel.DoesNotExist:
-            raise serializers.ValidationError(
-                "This model of the brand on the car does not exist in the database. "
-                "Please contact the site administrator.")
-
-    @staticmethod
     def validate_and_save_car(car, data, partial=False):
         if 'brand' in data:
             try:
-                CarSerializer.validate_name_car(data['brand'], data['model'])
+                CarSerializer.__validate_name_car(data['brand'], data['model'])
             except KeyError:
-                CarSerializer.validate_name_car(data['brand'], car.model)
+                CarSerializer.__validate_name_car(data['brand'], car.model)
         else:
             try:
-                CarSerializer.validate_name_car(car.brand, data['model'])
+                CarSerializer.__validate_name_car(car.brand, data['model'])
             except KeyError:
                 pass
-
         serializer = CarSerializer(car, data, partial=partial)
         serializer.is_valid(raise_exception=True)
         serializer.save(user_id=car.user_id)

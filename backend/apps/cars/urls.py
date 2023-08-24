@@ -21,6 +21,5 @@ urlpatterns = [
     path('/car_brands_in_db', BrandListAddView.as_view(), name='list_car_brands_in_db'),
     path('/car_brands_in_db/<int:id>', BrandUpdateDestroyView.as_view(), name='update_destroy_car_brand_in_db'),
     path('/<int:id>/model_by_brand_in_db', ModelListAddView.as_view(), name='list_add_model_by_brand_in_db'),
-    path('/<int:brand_id>/model_by_brand_in_db/<int:model_id>', ModelUpdateDestroyView.as_view(),
-         name='update_destroy_model_by_brand_in_db'),
+    path('/model_by_brand_in_db/<int:id>', ModelUpdateDestroyView.as_view(), name='update_destroy_model_by_brand_in_db')
 ]

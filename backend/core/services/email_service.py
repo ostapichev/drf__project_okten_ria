@@ -25,10 +25,6 @@ class EmailService:
         msg.send()
 
     @classmethod
-    def test_email(cls):
-        cls.__send_email('ytoxos@gmail.com', 'test_email.html', {}, 'Hello')
-
-    @classmethod
     def register_email(cls, user: UserDataClass):
         token = JWTService.create_token(user, ActivateToken)
         url = f'http://localhost:3000/activate/{token}'
@@ -51,5 +47,3 @@ class EmailService:
     def spam():
         for user in UserModel.objects.all():
             EmailService.__send_email(user.email, 'spam.html', {}, 'SPAM')
-
-
