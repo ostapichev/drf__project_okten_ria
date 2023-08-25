@@ -43,8 +43,9 @@ class EmailService:
         }, 'Recovery Password')
 
     @classmethod
-    def validate_content_user(cls, user: UserDataClass):
-        cls.__send_email(user.email, 'content_validate.html', {
-            'name': user.profile.name,
+    def validate_content_user(cls, manager_user: UserDataClass, user: UserDataClass):
+        cls.__send_email(manager_user.email, 'content_validate.html', {
+            'manager_user': manager_user.profile.name,
+            'email': user,
         }, 'Validate Content')
 

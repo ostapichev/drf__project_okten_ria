@@ -5,6 +5,7 @@ from rest_framework import serializers
 from rest_framework.response import Response
 
 from core.enums.regex_enum import RegExEnum
+from core.services.email_service import EmailService
 
 from apps.users.models import CountModel
 from apps.users.models import UserModel as User
@@ -39,6 +40,14 @@ class CarSerializer(serializers.ModelSerializer):
                 f'This model of the brand on the car does not exist in the database. {msg}')
 
     @staticmethod
+    def __validate_user(user_id):
+        manager_user = UserModel.objects.get(is_staff=True)
+        user = UserModel.objects.get(id=user_id)
+        user.is_active = False
+        user.save()
+        EmailService.validate_content_user(manager_user, user.email)
+
+    @staticmethod
     def validate_name_create_car(data):
         try:
             CarSerializer.__validate_name_car(data['brand'], data['model'])
@@ -58,13 +67,10 @@ class CarSerializer(serializers.ModelSerializer):
                     content_count.count = F('count') + 1
                     content_count.save()
                 count_content = CountModel.objects.filter(user_id=user_id)
-                if count_content[0].count > 3:
-                    user = UserModel.objects.filter(id=user_id)
-                    users = UserModel.objects.filter(email=user[0])
-                    print(users)
-                    print(f"{errors['content'][0]} user by email {user[0]} worked {count_content[0].count}")
+                if count_content[0].count > 2:
+                    serializer.__validate_user(user_id)
+                    content_count.delete()
             raise e
-
         return serializer
 
     @staticmethod
