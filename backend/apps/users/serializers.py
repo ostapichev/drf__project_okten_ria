@@ -88,7 +88,4 @@ class CitySerializer(serializers.ModelSerializer):
         fields = ('id', 'name')
 
 
-class CountValidateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CountModel
-        fields = ('id', 'count', 'user_id')
+

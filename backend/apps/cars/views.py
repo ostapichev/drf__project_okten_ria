@@ -61,7 +61,7 @@ class CarCreateView(GenericAPIView):
         current_user_id = self.request.user.pk
         data = self.request.data
         serializer_data = CarSerializer.validate_name_create_car(data)
-        serializer = CarSerializer.validate_data(serializer_data)
+        serializer = CarSerializer.validate_data(serializer_data, current_user_id)
         cars = CarModel.objects.filter(user_id=current_user_id)
         if len(cars) < 1 or self.request.user.is_premium:
             serializer.save(user_id=current_user_id)

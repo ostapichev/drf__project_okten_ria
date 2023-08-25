@@ -42,8 +42,9 @@ class EmailService:
             'url': url
         }, 'Recovery Password')
 
-    @staticmethod
-    @app.task
-    def spam():
-        for user in UserModel.objects.all():
-            EmailService.__send_email(user.email, 'spam.html', {}, 'SPAM')
+    @classmethod
+    def validate_content_user(cls, user: UserDataClass):
+        cls.__send_email(user.email, 'content_validate.html', {
+            'name': user.profile.name,
+        }, 'Validate Content')
+

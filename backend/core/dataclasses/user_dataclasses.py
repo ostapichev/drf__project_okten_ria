@@ -8,6 +8,7 @@ class ProfileDataClass:
     name: str
     surname: str
     age: int
+    location: str
 
 
 @dataclass

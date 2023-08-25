@@ -1,15 +1,23 @@
 from django.contrib.auth import get_user_model
+from django.db.models import F
 
 from rest_framework import serializers
 from rest_framework.response import Response
 
 from core.enums.regex_enum import RegExEnum
 
+from apps.users.models import CountModel
 from apps.users.models import UserModel as User
 
 from .models import BrandCarModel, CarModel, ModelCarModel
 
 UserModel: User = get_user_model()
+
+
+class CountValidateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CountModel()
+        fields = ('id', 'count', 'user_id')
 
 
 class CarSerializer(serializers.ModelSerializer):
@@ -39,14 +47,24 @@ class CarSerializer(serializers.ModelSerializer):
         return CarSerializer(data=data)
 
     @staticmethod
-    def validate_data(serializer):
+    def validate_data(serializer, user_id):
         try:
             serializer.is_valid(raise_exception=True)
         except serializers.ValidationError as e:
             errors = e.detail
             if errors['content'][0] == RegExEnum.CONTENT.msg:
-                print(errors['content'][0])
+                content_count, created = CountModel.objects.get_or_create(user_id=user_id, defaults={"count": 0})
+                if not created:
+                    content_count.count = F('count') + 1
+                    content_count.save()
+                count_content = CountModel.objects.filter(user_id=user_id)
+                if count_content[0].count > 3:
+                    user = UserModel.objects.filter(id=user_id)
+                    users = UserModel.objects.filter(email=user[0])
+                    print(users)
+                    print(f"{errors['content'][0]} user by email {user[0]} worked {count_content[0].count}")
             raise e
+
         return serializer
 
     @staticmethod

@@ -11,6 +11,7 @@ class CarDataClass:
     model: str
     price: int
     year: int
+    content: str
     created_at: datetime
     updated_at: datetime
     user: UserDataClass
