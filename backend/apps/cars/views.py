@@ -5,13 +5,14 @@ from django.utils.decorators import method_decorator
 from rest_framework import status
 from rest_framework.generics import GenericAPIView, UpdateAPIView
 from rest_framework.mixins import ListModelMixin
-from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from drf_yasg.utils import swagger_auto_schema
 
 from apps.users.models import UserModel as User
 
+from .mixins import MixinListAddNameCar, MixinUpdateNameCar
 from .models import BrandCarModel, CarModel, ModelCarModel
 from .serializers import BrandCarSerializer, CarPhotoSerializer, CarSerializer, ModelCarSerializer
 
@@ -121,122 +122,45 @@ class CarUpdateDestroyView(GenericAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class BrandListAddView(GenericAPIView):
+class BrandListAdd(MixinListAddNameCar):
     """
         get:
             Get all brands of cars
         post:
             Add brand of car
     """
-    permission_classes = (IsAdminUser,)
     serializer_class = BrandCarSerializer
-
-    def get(self, *args, **kwargs):
-        brands = BrandCarModel.objects.all()
-        serializer = BrandCarSerializer(brands, many=True)
-        return Response(serializer.data, status.HTTP_200_OK)
-
-    def post(self, *args, **kwargs):
-        brand_name = self.request.data.get('brand_name')
-        existing_brand = BrandCarModel.objects.filter(brand_name=brand_name).exists()
-        if existing_brand:
-            return Response("Brand with this name already exists.", status=status.HTTP_400_BAD_REQUEST)
-        serializer = BrandCarSerializer(data=self.request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    brand_model_class = BrandCarModel
 
 
-class BrandUpdateDestroyView(GenericAPIView):
+class BrandUpdateDestroyViewUpdateName(MixinUpdateNameCar):
     """
         patch:
             Update the brand
         delete:
             Delete the brand
     """
-    permission_classes = (IsAdminUser,)
     serializer_class = BrandCarSerializer
-
-    @staticmethod
-    def __get_object(pk):
-        try:
-            return BrandCarModel.objects.get(pk=pk)
-        except BrandCarModel.DoesNotExist:
-            raise Http404
-
-    def patch(self, request, id, *args, **kwargs):
-        brand = self.__get_object(id)
-        serializer = BrandCarSerializer(brand, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def delete(self, request, id, *args, **kwargs):
-        brand = self.__get_object(id)
-        brand.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    model_class = BrandCarModel
 
 
-class ModelListAddView(GenericAPIView):
+class ModelListAdd(MixinListAddNameCar):
     """
         get:
             Get all model by brand of cars
         post:
             Add model by brand of car
     """
-    permission_classes = (IsAdminUser,)
     serializer_class = ModelCarSerializer
-
-    @staticmethod
-    def __get_brand_or_404(brand_id):
-        try:
-            return BrandCarModel.objects.get(id=brand_id)
-        except BrandCarModel.DoesNotExist:
-            raise Http404
-
-    def get(self, request, id, *args, **kwargs):
-        brand = self.__get_brand_or_404(id)
-        models = ModelCarModel.objects.filter(brand=brand)
-        serializer = ModelCarSerializer(models, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def post(self, request, id, *args, **kwargs):
-        brand = self.__get_brand_or_404(id)
-        data = request.data
-        model_name = data.get('model_name')
-        if ModelCarModel.objects.filter(brand=brand, model_name=model_name).exists():
-            return Response("This model with this name already exists.", status=status.HTTP_400_BAD_REQUEST)
-        serializer = ModelCarSerializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save(brand=brand)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    model_model_class = ModelCarModel
 
 
-class ModelUpdateDestroyView(GenericAPIView):
+class ModelUpdateDestroyView(MixinUpdateNameCar):
     """
         patch:
             Update model by brand of car
         delete:
             Delete model by brand of car
     """
-    permission_classes = (IsAdminUser,)
     serializer_class = ModelCarSerializer
-
-    @staticmethod
-    def __get_object_or_404(model_id):
-        try:
-            return ModelCarModel.objects.get(id=model_id)
-        except ModelCarModel.DoesNotExist:
-            raise Http404
-
-    def patch(self, request, id, *args, **kwargs):
-        model = self.__get_object_or_404(id)
-        serializer = ModelCarSerializer(model, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def delete(self, request, id, *args, **kwargs):
-        model = self.__get_object_or_404(id)
-        model.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    model_class = ModelCarModel

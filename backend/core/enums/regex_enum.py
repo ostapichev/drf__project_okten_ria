@@ -10,7 +10,7 @@ class RegExEnum(Enum):
     )
 
     MODEL = (
-        r'^[A-Z][a-zA-Z\d]{1,24}$',
+        r'^[A-Z][a-zA-Z\d-]{1,24}$',
         _('First letter uppercase min 2 max 24 ch')
     )
 

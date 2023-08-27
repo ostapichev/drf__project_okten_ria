@@ -2,13 +2,13 @@ from django.urls import path
 
 from .views import (
     AllCarsListView,
-    BrandListAddView,
-    BrandUpdateDestroyView,
+    BrandListAdd,
+    BrandUpdateDestroyViewUpdateName,
     CarAddPhotoView,
     CarCreateView,
     CarListView,
     CarUpdateDestroyView,
-    ModelListAddView,
+    ModelListAdd,
     ModelUpdateDestroyView,
 )
 
@@ -18,8 +18,8 @@ urlpatterns = [
     path('/<int:id>', CarUpdateDestroyView.as_view(), name='car_update_destroy'),
     path('/<int:pk>/user_cars', CarListView.as_view(), name='car_list_user'),
     path('/create_car', CarCreateView.as_view(), name='car_create'),
-    path('/car_brands_in_db', BrandListAddView.as_view(), name='list_car_brands_in_db'),
-    path('/car_brands_in_db/<int:id>', BrandUpdateDestroyView.as_view(), name='update_destroy_car_brand_in_db'),
-    path('/<int:id>/model_by_brand_in_db', ModelListAddView.as_view(), name='list_add_model_by_brand_in_db'),
+    path('/car_brands_in_db', BrandListAdd.as_view(), name='list_car_brands_in_db'),
+    path('/car_brands_in_db/<int:id>', BrandUpdateDestroyViewUpdateName.as_view(), name='update_destroy_car_brand_in_db'),
+    path('/<int:id>/model_by_brand_in_db', ModelListAdd.as_view(), name='list_add_model_by_brand_in_db'),
     path('/model_by_brand_in_db/<int:id>', ModelUpdateDestroyView.as_view(), name='update_destroy_model_by_brand_in_db')
 ]

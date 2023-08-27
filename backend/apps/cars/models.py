@@ -55,7 +55,7 @@ class BrandCarModel(models.Model):
 
 class ModelCarModel(models.Model):
     model_name = models.CharField(max_length=25, validators=(
-        validators.RegexValidator(RegExEnum.BRAND.pattern, RegExEnum.BRAND.msg),
+        validators.RegexValidator(RegExEnum.MODEL.pattern, RegExEnum.MODEL.msg),
     ))
     brand = models.ForeignKey(BrandCarModel, on_delete=models.PROTECT, related_name='model', null=True)
 

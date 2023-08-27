@@ -48,4 +48,3 @@ class EmailService:
             'manager_user': manager_user.profile.name,
             'email': user,
         }, 'Validate Content')
-
