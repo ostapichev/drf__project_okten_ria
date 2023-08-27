@@ -130,10 +130,10 @@ class BrandListAdd(MixinListAddNameCar):
             Add brand of car
     """
     serializer_class = BrandCarSerializer
-    brand_model_class = BrandCarModel
+    model_class = BrandCarModel
 
 
-class BrandUpdateDestroyViewUpdateName(MixinUpdateNameCar):
+class BrandUpdateDestroyView(MixinUpdateNameCar):
     """
         patch:
             Update the brand
@@ -152,7 +152,7 @@ class ModelListAdd(MixinListAddNameCar):
             Add model by brand of car
     """
     serializer_class = ModelCarSerializer
-    model_model_class = ModelCarModel
+    model_class = ModelCarModel
 
 
 class ModelUpdateDestroyView(MixinUpdateNameCar):

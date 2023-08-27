@@ -14,13 +14,12 @@ class BaseMixinCarName(GenericAPIView):
 
 
 class MixinListAddNameCar(BaseMixinCarName):
-    brand_model_class = None
-    model_model_class = None
+    model_class = None
 
     @staticmethod
-    def get_brand_or_404(brand_id: int, model_class: object = BrandCarModel) -> object:
+    def __get_brand_or_404(brand_id):
         try:
-            return model_class.objects.get(id=brand_id)
+            return BrandCarModel.objects.get(id=brand_id)
         except BrandCarModel.DoesNotExist:
             raise Http404
 
@@ -40,8 +39,8 @@ class MixinListAddNameCar(BaseMixinCarName):
         if id is None:
             items = BrandCarModel.objects.all()
         else:
-            brand = self.get_brand_or_404(id)
-            items = self.model_model_class.objects.filter(brand=brand)
+            brand = self.__get_brand_or_404(id)
+            items = self.model_class.objects.filter(brand=brand)
         serializer = self.serializer_class(items, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -50,9 +49,9 @@ class MixinListAddNameCar(BaseMixinCarName):
             serializer = self.__add_brand()
             serializer.save()
         else:
-            brand_name = self.get_brand_or_404(id)
+            brand_name = self.__get_brand_or_404(id)
             model_name = self.request.data.get('model_name')
-            if self.model_model_class.objects.filter(brand=brand_name, model_name=model_name).exists():
+            if self.model_class.objects.filter(brand=brand_name, model_name=model_name).exists():
                 return Response("This model with this name already exists.", status=status.HTTP_400_BAD_REQUEST)
             serializer = self.__validate_serializer()
             serializer.save(brand=brand_name)
@@ -60,14 +59,25 @@ class MixinListAddNameCar(BaseMixinCarName):
 
 
 class MixinUpdateNameCar(BaseMixinCarName):
+    model_class = None
+
+    @staticmethod
+    def __get_object(pk, model_class):
+        try:
+            return model_class.objects.get(pk=pk)
+        except model_class.DoesNotExist:
+            raise Http404
+
     def patch(self, request, id, *args, **kwargs):
-        instance = MixinListAddNameCar.get_brand_or_404(id, ModelCarModel)
+        model_class = self.model_class
+        instance = self.__get_object(id, model_class)
         serializer = self.serializer_class(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def delete(self, request, id, *args, **kwargs):
-        instance = MixinListAddNameCar.get_brand_or_404(id, ModelCarModel)
+        model_class = self.model_class
+        instance = self.__get_object(id, model_class)
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
