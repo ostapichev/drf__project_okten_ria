@@ -20,7 +20,7 @@ class CarModel(BaseModel):
         validators.RegexValidator(RegExEnum.BRAND.pattern, RegExEnum.BRAND.msg),
     ))
     model = models.CharField(max_length=25, validators=(
-        validators.RegexValidator(RegExEnum.MODEL.pattern, RegExEnum.BRAND.msg),
+        validators.RegexValidator(RegExEnum.MODEL.pattern, RegExEnum.MODEL.msg),
     ))
     price = models.IntegerField(validators=(
         validators.MinValueValidator(0),

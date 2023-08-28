@@ -5,7 +5,7 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 
-from apps.cars.models import BrandCarModel, ModelCarModel
+from apps.cars.models import BrandCarModel
 
 
 class BaseMixinCarName(GenericAPIView):

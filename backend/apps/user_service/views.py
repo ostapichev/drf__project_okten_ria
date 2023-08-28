@@ -15,10 +15,14 @@ from apps.users.serializers import UserSerializer
 UserModel: User = get_user_model()
 
 
-class UserToAdminView(GenericAPIView):
-    permission_classes = (IsSuperUser,)
+class BaseUserServiceView(GenericAPIView):
+    permission_classes = None
     queryset = UserModel.objects.all()
     serializer_class = UserSerializer
+
+
+class UserToAdminView(BaseUserServiceView):
+    permission_classes = (IsSuperUser,)
 
     def get_queryset(self):
         return super().get_queryset().exclude(pk=self.request.user.pk)
@@ -33,10 +37,8 @@ class UserToAdminView(GenericAPIView):
         return Response(serializer.data, status.HTTP_200_OK)
 
 
-class AdminToUserView(GenericAPIView):
+class AdminToUserView(BaseUserServiceView):
     permission_classes = (IsSuperUser,)
-    queryset = UserModel.objects.all()
-    serializer_class = UserSerializer
 
     def get_queryset(self):
         return super().get_queryset().exclude(pk=self.request.user.pk)
@@ -50,10 +52,8 @@ class AdminToUserView(GenericAPIView):
         return Response(serializer.data, status.HTTP_200_OK)
 
 
-class BlockUserView(GenericAPIView):
+class BlockUserView(BaseUserServiceView):
     permission_classes = (IsAdminUser,)
-    queryset = UserModel.objects.all()
-    serializer_class = UserSerializer
 
     def get_queryset(self):
         return super().get_queryset().exclude(pk=self.request.user.pk)
@@ -67,10 +67,8 @@ class BlockUserView(GenericAPIView):
         return Response(serializer.data, status.HTTP_200_OK)
 
 
-class UnBlockUserView(GenericAPIView):
+class UnBlockUserView(BaseUserServiceView):
     permission_classes = (IsAdminUser,)
-    queryset = UserModel.objects.all()
-    serializer_class = UserSerializer
 
     def get_queryset(self):
         return super().get_queryset().exclude(pk=self.request.user.pk)
@@ -84,22 +82,16 @@ class UnBlockUserView(GenericAPIView):
         return Response(serializer.data, status.HTTP_200_OK)
 
 
-class BlockAminView(BlockUserView):
+class BlockAdminView(BlockUserView):
     permission_classes = (IsSuperUser,)
-    queryset = UserModel.objects.all()
-    serializer_class = UserSerializer
 
 
-class UnBlockAminView(UnBlockUserView):
+class UnBlockAdminView(UnBlockUserView):
     permission_classes = (IsSuperUser,)
-    queryset = UserModel.objects.all()
-    serializer_class = UserSerializer
 
 
-class UserToPremium(GenericAPIView):
+class UserToPremiumView(BaseUserServiceView):
     permission_classes = (IsAuthenticated,)
-    queryset = UserModel.objects.all()
-    serializer_class = UserSerializer
 
     def patch(self, *args, **kwargs):
         current_user_id = self.request.user.pk
@@ -108,17 +100,14 @@ class UserToPremium(GenericAPIView):
         if not user.is_premium and current_user_id == pk:
             user.is_premium = True
             user.save()
+        else:
+            return Response("Not found")
         serializer = UserSerializer(user)
         return Response(serializer.data, status.HTTP_200_OK)
 
 
-class UserToNotPremium(GenericAPIView):
+class UserToNotPremiumView(BaseUserServiceView):
     permission_classes = (IsAuthenticated,)
-    queryset = UserModel.objects.all()
-    serializer_class = UserSerializer
-
-    def get_queryset(self):
-        return super().get_queryset().exclude(pk=self.request.user.pk)
 
     def patch(self, *args, **kwargs):
         current_user_id = self.request.user.pk
@@ -127,5 +116,7 @@ class UserToNotPremium(GenericAPIView):
         if user.is_premium and current_user_id == pk:
             user.is_premium = False
             user.save()
+        else:
+            return Response("Not found")
         serializer = UserSerializer(user)
         return Response(serializer.data, status.HTTP_200_OK)
