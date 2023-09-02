@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.http import Http404
+from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 
 from rest_framework import status
@@ -35,7 +36,7 @@ class AllCarsListView(GenericAPIView, ListModelMixin):
 @method_decorator(name='get', decorator=swagger_auto_schema(security=[]))
 class CarListView(GenericAPIView):
     """
-        Get car by id user
+        Get cars by id user
     """
     serializer_class = CarSerializer
     queryset = UserModel.objects.all()
@@ -47,6 +48,20 @@ class CarListView(GenericAPIView):
             raise Http404()
         cars = CarModel.objects.filter(user_id=pk)
         serializer = CarSerializer(cars, many=True)
+        return Response(serializer.data, status.HTTP_200_OK)
+
+
+@method_decorator(name='get', decorator=swagger_auto_schema(security=[]))
+class CarByIdView(GenericAPIView):
+    """
+        Get car by id
+    """
+    serializer_class = CarSerializer
+    permission_classes = (AllowAny,)
+
+    def get(self, *args, **kwargs):
+        car = get_object_or_404(CarModel, pk=kwargs['id'])
+        serializer = CarSerializer(car)
         return Response(serializer.data, status.HTTP_200_OK)
 
 
