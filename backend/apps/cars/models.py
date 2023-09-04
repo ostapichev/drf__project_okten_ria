@@ -61,3 +61,12 @@ class ModelCarModel(models.Model):
     class Meta:
         db_table = 'car_models'
         ordering = ('id',)
+
+
+class CountViewCarModel(models.Model):
+    count_view = models.PositiveIntegerField(default=0)
+    car = models.ForeignKey(CarModel, on_delete=models.CASCADE, related_name='count_view', null=True)
+
+    class Meta:
+        db_table = 'count_view_car'
+        ordering = ('id', 'count_view')
