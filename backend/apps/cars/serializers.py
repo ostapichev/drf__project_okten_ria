@@ -76,7 +76,7 @@ class CarSerializer(serializers.ModelSerializer):
                     content_count.save()
                 count_content = CountModel.objects.filter(user_id=user_id)
                 if count_content[0].count > 2:
-                    UserValidator.validate_user(user_id)
+                    UserValidator.validate_content_user(user_id)
                     content_count.delete()
             raise e
         return serializer

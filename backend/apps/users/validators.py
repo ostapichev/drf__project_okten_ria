@@ -9,7 +9,7 @@ UserModel: User = get_user_model()
 
 class UserValidator:
     @staticmethod
-    def validate_user(user_id):
+    def validate_content_user(user_id):
         manager_user = UserModel.objects.get(is_manager=True)
         user = UserModel.objects.get(id=user_id)
         if not user.is_staff:
