@@ -18,4 +18,4 @@ class IsAdminOrWriteOnlyPermission(BasePermission):
         if request.method == 'POST':
             return True
         user: UserDataClass = request.user
-        return user.is_staff
+        return bool(request.user and request.user.is_staff and request.user.is_manager)

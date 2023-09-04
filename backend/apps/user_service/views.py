@@ -32,6 +32,8 @@ class UserToAdminView(BaseUserServiceView):
         user = self.get_object()
         if not user.is_staff:
             user.is_staff = True
+            user.is_manager = True
+            user.is_premium = True
             user.save()
         serializer = UserSerializer(user)
         return Response(serializer.data, status.HTTP_200_OK)
@@ -47,6 +49,8 @@ class AdminToUserView(BaseUserServiceView):
         user: User = self.get_object()
         if user.is_staff:
             user.is_staff = False
+            user.is_manager = False
+            user.is_premium = False
             user.save()
         serializer = UserSerializer(user)
         return Response(serializer.data, status.HTTP_200_OK)

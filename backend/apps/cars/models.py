@@ -11,6 +11,7 @@ from core.services.upload_images_service import upload_photo_car
 from apps.users.models import UserModel as User
 
 from .managers import CarManager
+from .validators import CarValidator
 
 UserModel: User = get_user_model()
 
@@ -30,9 +31,7 @@ class CarModel(BaseModel):
         validators.MinValueValidator(1990),
         validators.MaxValueValidator(datetime.now().year)
     ))
-    content = models.TextField(validators=(
-        validators.RegexValidator(RegExEnum.CONTENT.pattern, RegExEnum.CONTENT.msg),
-    ))
+    content = models.TextField(validators=[CarValidator.validate_content])
     user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='cars', null=True)
     objects = models.Manager()
     my_object = CarManager()

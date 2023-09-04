@@ -1,5 +1,7 @@
+import re
 from enum import Enum
 
+from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
 
@@ -34,11 +36,6 @@ class RegExEnum(Enum):
         r'[a-zA-Z\d\'`\!@#$%\^&\*\(\)\-_=\+\|\\\/\?\.>,<]{8,30}$',
         _('This password must be at least one uppercase letter, at least one lowercase letter, '
           'at least one special character and at least one number min 8 max 30 characters.')
-    )
-
-    CONTENT = (
-        r'^\b(?!fuck you|fuck|dick|shit|bitch)\b\w+$',
-        _('This content has some bad words!!!')
     )
 
     def __init__(self, pattern: str, msg: str | list[str]):

@@ -47,6 +47,7 @@ class UserSerializer(serializers.ModelSerializer):
             'is_active',
             'is_premium',
             'is_staff',
+            'is_manager',
             'is_superuser',
             'last_login',
             'created_at',

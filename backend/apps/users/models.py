@@ -39,6 +39,7 @@ class UserModel(AbstractBaseUser, PermissionsMixin, BaseModel):
     ))
     is_active = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
+    is_manager = models.BooleanField(default=False)
     is_premium = models.BooleanField(default=False)
     objects = UserManager()
     profile = models.OneToOneField(ProfileModel, on_delete=models.CASCADE, related_name='user', null=True)
